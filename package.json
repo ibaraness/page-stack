@@ -13,6 +13,9 @@
   "bugs": {
     "url": "https://github.com/ibaraness/page-stack/issues"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
     "react",
     "navigation",
@@ -45,13 +48,15 @@
     "build:css": "tailwindcss -i ./src/index.css -o ./dist/page-stack.css --minify",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "playground": "npm run dev --workspace playground",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run test && npm run build"
   },
   "peerDependencies": {
+    "motion": "^12.38.0",
     "react": ">=18",
-    "react-dom": ">=18",
-    "motion": "^12.38.0"
+    "react-dom": ">=18"
   },
   "peerDependenciesMeta": {
     "motion": {
@@ -60,14 +65,18 @@
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.0.0",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.2",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "jsdom": "^29.1.1",
     "motion": "^12.38.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwindcss": "^4.0.0",
     "tsup": "^8.0.0",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "vitest": "^4.1.8"
   },
   "workspaces": [
     "playground"

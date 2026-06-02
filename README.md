@@ -340,6 +340,8 @@ npm install          # install root + playground deps
 npm run playground   # start the Vite playground (aliased to ./src for HMR)
 npm run build        # build the library → dist/ (ESM + CJS + .d.ts + page-stack.css)
 npm run typecheck    # type-check the library
+npm test             # run unit tests (Vitest)
+npm run test:watch   # run tests in watch mode
 ```
 
 ### Structure
