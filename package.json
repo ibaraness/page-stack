@@ -1,0 +1,75 @@
+{
+  "name": "@ibaraness/page-stack",
+  "version": "0.1.0",
+  "description": "A lightweight React navigation stack — push/pop pages with animated transitions.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Idan Baraness",
+  "homepage": "https://github.com/ibaraness/page-stack#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ibaraness/page-stack.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ibaraness/page-stack/issues"
+  },
+  "keywords": [
+    "react",
+    "navigation",
+    "stack",
+    "page",
+    "router",
+    "tailwind",
+    "transition"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./styles.css": "./dist/page-stack.css"
+  },
+  "scripts": {
+    "build": "npm run build:js && npm run build:css",
+    "build:js": "tsup",
+    "build:css": "tailwindcss -i ./src/index.css -o ./dist/page-stack.css --minify",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "playground": "npm run dev --workspace playground",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18",
+    "motion": "^12.38.0"
+  },
+  "peerDependenciesMeta": {
+    "motion": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "motion": "^12.38.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwindcss": "^4.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0"
+  },
+  "workspaces": [
+    "playground"
+  ]
+}

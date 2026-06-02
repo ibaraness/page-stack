@@ -1,0 +1,16 @@
+{
+  "name": "@ibaraness/page-stack",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Portable in-app page stack (copy folder — not published from this repo)",
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18",
+    "motion": "^12.38.0"
+  },
+  "peerDependenciesMeta": {
+    "motion": {
+      "optional": true
+    }
+  }
+}

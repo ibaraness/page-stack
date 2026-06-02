@@ -1,0 +1,9 @@
+/*
+ * Library stylesheet. Built to `dist/page-stack.css` and exported as
+ * `@ibaraness/page-stack/styles.css` for consumers that do NOT use Tailwind.
+ *
+ * `source(none)` disables Tailwind's automatic file detection so that only the
+ * utility classes actually used by this package's components are emitted.
+ */
+@import "tailwindcss" source(none);
+@source "./**/*.{ts,tsx}";
