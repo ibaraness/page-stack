@@ -1,5 +1,6 @@
 import {
-  InMemoryPageStackProvider,
+  BrowserHistoryPageStackProvider,
+  createBrowserHistoryPersistence,
   PageStackOutlet,
   usePageStackCore,
 } from "@ibaraness/page-stack";
@@ -112,11 +113,12 @@ export default function App() {
           @ibaraness/page-stack
         </h2>
         <div className="flex h-[640px] w-[360px] flex-col overflow-hidden rounded-[2.5rem] border-8 border-slate-900 bg-white shadow-2xl">
-          <InMemoryPageStackProvider
+          <BrowserHistoryPageStackProvider
             config={{ initialPageId: "home", isValidPageId: isPageId }}
+            persistence={createBrowserHistoryPersistence({ initialPageId: "home", isValidPageId: isPageId })}
           >
             <PageStackOutlet pages={pages} />
-          </InMemoryPageStackProvider>
+          </BrowserHistoryPageStackProvider>
         </div>
       </div>
     </div>

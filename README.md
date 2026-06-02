@@ -103,6 +103,177 @@ export function Wizard() {
 }
 ```
 
+## Browser history mode
+
+Use this when the stack should survive **refresh**, **deep links**, and the device **back button** — for example a mobile-style app shell where each screen is a `history` entry.
+
+### In-memory vs browser
+
+| | `InMemoryPageStackProvider` | `BrowserHistoryPageStackProvider` |
+| --- | --- | --- |
+| URL / `history` | Unchanged | `pushState` / `replaceState` on each stack change |
+| `popPage()` | Shrinks React state only | Calls `history.back()`; stack syncs in `popstate` |
+| `resetPageStackToRoot()` | Collapses stack in memory | `history.go(-stepsBack)` when stack depth is greater than 1 |
+| Back button | No effect on stack | Restores stack from `history.state` |
+
+The navigation hooks (`usePageStackCore`) are the same in both modes — only the provider and persistence layer differ.
+
+### Quick start (browser + `createBrowserHistoryPersistence`)
+
+`createBrowserHistoryPersistence` is the built-in adapter: it reads and writes the page id array on `window.history.state`. Pair it with `BrowserHistoryPageStackProvider`.
+
+```tsx
+"use client";
+
+import {
+  BrowserHistoryPageStackProvider,
+  createBrowserHistoryPersistence,
+  PageStackOutlet,
+  usePageStackCore,
+} from "@ibaraness/page-stack";
+
+type PageId = "home" | "profile" | "settings";
+
+const PAGE_IDS: PageId[] = ["home", "profile", "settings"];
+const isPageId = (id: string): id is PageId =>
+  (PAGE_IDS as string[]).includes(id);
+
+const config = { initialPageId: "home" as const, isValidPageId: isPageId };
+
+function Home() {
+  const { pushPage } = usePageStackCore<PageId>();
+  return <button onClick={() => pushPage("profile")}>Profile</button>;
+}
+
+function Profile() {
+  const { pushPage, popPage, canGoBack } = usePageStackCore<PageId>();
+  return (
+    <>
+      {canGoBack && <button onClick={() => popPage()}>Back</button>}
+      <button onClick={() => pushPage("settings")}>Settings</button>
+    </>
+  );
+}
+
+function Settings() {
+  const { resetPageStackToRoot } = usePageStackCore<PageId>();
+  return <button onClick={() => resetPageStackToRoot()}>Home</button>;
+}
+
+const pages = {
+  home: Home,
+  profile: Profile,
+  settings: Settings,
+} satisfies Record<PageId, React.ComponentType>;
+
+export function AppShell() {
+  return (
+    <BrowserHistoryPageStackProvider
+      config={config}
+      persistence={createBrowserHistoryPersistence(config)}
+    >
+      <PageStackOutlet pages={pages} />
+    </BrowserHistoryPageStackProvider>
+  );
+}
+```
+
+On first mount, persistence either **hydrates** from existing `history.state` or seeds the stack with `[initialPageId]` via `replaceState`. Each `pushPage` appends an id and calls `pushState`; `popPage` delegates to `history.back()` and updates React state when `popstate` fires.
+
+### What `createBrowserHistoryPersistence` does
+
+Pass the same `PageStackConfig` you use on the provider (plus an optional `stackKey`):
+
+```ts
+createBrowserHistoryPersistence({
+  initialPageId: "home",
+  isValidPageId: isPageId,
+  stackKey: "appStack", // optional; default is DEFAULT_HISTORY_STACK_KEY ("appStack")
+});
+```
+
+| Persistence hook | Role |
+| --- | --- |
+| `initialize` | Read stack from `history.state[stackKey]`, or write `[initialPageId]` if missing |
+| `commitStackChange` | `push` / `replace` → `pushState`; `reset-replace` → `replaceState` |
+| `popPage` | `window.history.back()` (engine does not pop in memory first) |
+| `resetPageStackToRoot` | `window.history.go(-stepsBack)` when collapsing a deep stack |
+| `handlePopState` | Sanitize stack from `event.state`, set slide direction, sync React state |
+
+The stack is stored as a **string array** on `history.state`, e.g. `{ appStack: ["home", "profile"] }`. Unrelated keys on `history.state` are preserved via shallow merge when writing.
+
+Re-exported constant: `DEFAULT_HISTORY_STACK_KEY` (`"appStack"`). Override `stackKey` if another library already uses that property name.
+
+### `BrowserHistoryPageStackProvider` props
+
+```tsx
+<BrowserHistoryPageStackProvider
+  config={{ initialPageId, isValidPageId }}
+  persistence={createBrowserHistoryPersistence(config)}
+>
+  {children}
+</BrowserHistoryPageStackProvider>
+```
+
+- **`config`** — `initialPageId` and `isValidPageId` (same as in-memory mode).
+- **`persistence`** — any `PageStackPersistence` implementation. Use `createBrowserHistoryPersistence` for stack-only sync; implement custom persistence when you also need reducers, session traces, or extra `history.state` fields.
+
+Convenience alias: **`PageStackProvider`** accepts a single `integration` object that merges `config` + persistence methods (`PageStackIntegration`). Prefer `BrowserHistoryPageStackProvider` when config and persistence are defined separately.
+
+### Composing persistence (`mergePageStackPersistence`)
+
+When the host app must persist **more than the page stack** (global store, flow snapshots, analytics), implement `PageStackPersistence` in your app and layer it on top of the browser adapter:
+
+```ts
+import {
+  createBrowserHistoryPersistence,
+  mergePageStackPersistence,
+} from "@ibaraness/page-stack";
+
+const config = { initialPageId: "home" as const, isValidPageId: isPageId };
+
+const persistence = mergePageStackPersistence(
+  createBrowserHistoryPersistence(config),
+  {
+    commitStackChange(ctx) {
+      // e.g. sync Redux, save session trace — runs after base writes history
+    },
+    onCurrentPageChange(pageId) {
+      // analytics, document title, etc.
+    },
+  },
+);
+
+// <BrowserHistoryPageStackProvider config={config} persistence={persistence} />
+```
+
+`mergePageStackPersistence(base, overlay)` calls **both** layers for `initialize`, `commitStackChange`, and `handlePopState`. For `popPage` and `resetPageStackToRoot`, the **overlay wins** if it defines those methods; otherwise the base (browser) behavior runs.
+
+### Custom persistence with `createHistoryStackUtils`
+
+If you cannot use `createBrowserHistoryPersistence` as-is, use the lower-level helpers (same stack key semantics):
+
+```ts
+import { createHistoryStackUtils, DEFAULT_HISTORY_STACK_KEY } from "@ibaraness/page-stack";
+
+const { stackKey, sanitizeStack, readStackFromHistory, mergeHistoryState } =
+  createHistoryStackUtils({ initialPageId: "home", isValidPageId: isPageId });
+```
+
+Wire those inside your own `PageStackPersistence` (`initialize`, `commitStackChange`, `handlePopState`). See [`src/README.md`](./src/README.md) for the portable folder copy guide and host-app patterns.
+
+### Browser mode: `usePageStackCore` behavior
+
+| Member | Browser behavior |
+| --- | --- |
+| `pushPage(id)` | Appends id, `pushState` with updated stack |
+| `popPage()` | `history.back()` — stack updates on `popstate` |
+| `replacePageStack(stack)` | Replaces stack; uses `pushState` (new history entry) |
+| `resetPageStackToRoot()` | `history.go(-n)` when `n > 0`, else in-memory collapse |
+| `navigationDirection` | Set from stack depth change on `popstate` |
+
+Invalid page ids passed to `pushPage` are still ignored (same as in-memory). The first entry of any stack must remain `initialPageId` after sanitization.
+
 ## Public API
 
 **Providers**
@@ -158,8 +329,7 @@ import type {
 } from "@ibaraness/page-stack";
 ```
 
-> For browser-history mode, persistence composition, and advanced patterns,
-> see the in-depth guide in [`src/README.md`](./src/README.md).
+For copying the source tree into another repo (relative imports, folder layout), see [`src/README.md`](./src/README.md).
 
 ## Local development
 
