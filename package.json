@@ -1,6 +1,6 @@
 {
   "name": "@ibaraness/page-stack",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A lightweight React navigation stack — push/pop pages with animated transitions.",
   "type": "module",
   "license": "MIT",
