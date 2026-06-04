@@ -1,6 +1,6 @@
 {
   "name": "@ibaraness/page-stack",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "Portable in-app page stack (copy folder — not published from this repo)",
   "peerDependencies": {

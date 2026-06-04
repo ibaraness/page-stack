@@ -1,9 +1,12 @@
 /*
- * Library stylesheet. Built to `dist/page-stack.css` and exported as
+ * Library stylesheet. Built to `dist/styles.css` and exported as
  * `@ibaraness/page-stack/styles.css` for consumers that do NOT use Tailwind.
  *
- * `source(none)` disables Tailwind's automatic file detection so that only the
- * utility classes actually used by this package's components are emitted.
+ * Preflight is omitted so importing the bundle does not reset the host app's
+ * base styles. Only theme tokens + utilities used by this package are emitted.
  */
-@import "tailwindcss" source(none);
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities) source(none);
 @source "./**/*.{ts,tsx}";
+@source "../dist/**/*.{js,cjs}";

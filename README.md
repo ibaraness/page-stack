@@ -338,7 +338,7 @@ npm workspace: the package is at the root, a Vite playground lives in `playgroun
 ```bash
 npm install          # install root + playground deps
 npm run playground   # start the Vite playground (aliased to ./src for HMR)
-npm run build        # build the library → dist/ (ESM + CJS + .d.ts + page-stack.css)
+npm run build        # build the library → dist/ (ESM + CJS + .d.ts + styles.css)
 npm run typecheck    # type-check the library
 npm test             # run unit tests (Vitest)
 npm run test:watch   # run tests in watch mode
@@ -357,7 +357,7 @@ npm run test:watch   # run tests in watch mode
 │   ├── slideTransition.ts
 │   ├── browser/
 │   ├── types.ts
-│   └── index.css        # Tailwind entry → built to dist/page-stack.css
+│   └── index.css        # Tailwind entry → built to dist/styles.css
 ├── playground/          # Vite + Tailwind demo app
 ├── tsup.config.ts       # library build config (ESM + CJS + d.ts)
 └── package.json

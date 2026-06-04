@@ -1,6 +1,6 @@
 {
   "name": "@ibaraness/page-stack",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A lightweight React navigation stack — push/pop pages with animated transitions.",
   "type": "module",
   "license": "MIT",
@@ -40,12 +40,12 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./styles.css": "./dist/page-stack.css"
+    "./styles.css": "./dist/styles.css"
   },
   "scripts": {
     "build": "npm run build:js && npm run build:css",
     "build:js": "tsup",
-    "build:css": "tailwindcss -i ./src/index.css -o ./dist/page-stack.css --minify",
+    "build:css": "tailwindcss -i ./src/index.css -o ./dist/styles.css --minify",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
